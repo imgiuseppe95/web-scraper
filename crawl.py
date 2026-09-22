@@ -77,3 +77,38 @@ def get_html(url: str) -> str:
         raise ValueError(f"expected text/html content type, got {content_type}")
 
     return response.text
+
+
+def crawl_page(
+    base_url: str,
+    current_url: str | None = None,
+    page_data: dict | None = None,
+) -> dict:
+    if current_url is None:
+        current_url = base_url
+    if page_data is None:
+        page_data = {}
+
+    base_domain = urlsplit(base_url).netloc.lower()
+    current_domain = urlsplit(current_url).netloc.lower()
+    if current_domain != base_domain:
+        return page_data
+
+    normalized_url = normalize_url(current_url)
+    if normalized_url in page_data:
+        return page_data
+
+    print(f"crawling {current_url}")
+    try:
+        html = get_html(current_url)
+    except Exception as error:
+        print(f"Error crawling {current_url}: {error}")
+        return page_data
+
+    data = extract_page_data(html, current_url)
+    page_data[normalized_url] = data
+
+    for next_url in data["outgoing_links"]:
+        crawl_page(base_url, next_url, page_data)
+
+    return page_data
