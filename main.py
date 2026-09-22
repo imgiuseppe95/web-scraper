@@ -10,13 +10,23 @@ async def main():
         print("no website provided")
         sys.exit(1)
 
-    if len(sys.argv) > 2:
-        print("too many arguments provided")
+    try:
+        base_url = sys.argv[1]
+        max_concurrency = int(sys.argv[2]) if len(sys.argv) > 2 else 10
+        max_pages = int(sys.argv[3]) if len(sys.argv) > 3 else 100
+        if len(sys.argv) > 4:
+            raise ValueError
+    except ValueError:
+        print("usage: uv run main.py BASE_URL [MAX_CONCURRENCY] [MAX_PAGES]")
         sys.exit(1)
 
-    print(f"starting crawl of: {sys.argv[1]}")
+    if max_concurrency < 1 or max_pages < 1:
+        print("MAX_CONCURRENCY and MAX_PAGES must be positive integers")
+        sys.exit(1)
+
+    print(f"starting crawl of: {base_url}")
     try:
-        page_data = await crawl_site_async(sys.argv[1])
+        page_data = await crawl_site_async(base_url, max_concurrency, max_pages)
     except Exception as error:
         print(f"Error crawling URL: {error}")
         sys.exit(1)
