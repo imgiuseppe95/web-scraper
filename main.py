@@ -44,6 +44,16 @@ def get_images_from_html(html: str, base_url: str) -> list[str]:
     return image_urls
 
 
+def extract_page_data(html: str, page_url: str) -> dict:
+    return {
+        "url": page_url,
+        "heading": get_heading_from_html(html),
+        "first_paragraph": get_first_paragraph_from_html(html),
+        "outgoing_links": get_urls_from_html(html, page_url),
+        "image_urls": get_images_from_html(html, page_url),
+    }
+
+
 def main():
     print("Hello from web-scraper!")
 

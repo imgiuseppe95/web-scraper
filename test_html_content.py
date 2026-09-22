@@ -5,6 +5,7 @@ from main import (
     get_heading_from_html,
     get_images_from_html,
     get_urls_from_html,
+    extract_page_data,
 )
 
 
@@ -68,6 +69,23 @@ class TestHtmlContent(unittest.TestCase):
         base_url = "https://crawler-test.com"
         html = '<html><body><img alt="Missing source"></body></html>'
         self.assertEqual(get_images_from_html(html, base_url), [])
+
+    def test_extract_page_data_basic(self):
+        page_url = "https://crawler-test.com"
+        html = """<html><body>
+            <h1>Test Title</h1>
+            <p>This is the first paragraph.</p>
+            <a href="/link1">Link 1</a>
+            <img src="/image1.jpg" alt="Image 1">
+        </body></html>"""
+        expected = {
+            "url": "https://crawler-test.com",
+            "heading": "Test Title",
+            "first_paragraph": "This is the first paragraph.",
+            "outgoing_links": ["https://crawler-test.com/link1"],
+            "image_urls": ["https://crawler-test.com/image1.jpg"],
+        }
+        self.assertEqual(extract_page_data(html, page_url), expected)
 
 
 if __name__ == "__main__":
