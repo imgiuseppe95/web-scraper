@@ -1,6 +1,11 @@
 import unittest
 
-from main import get_first_paragraph_from_html, get_heading_from_html
+from main import (
+    get_first_paragraph_from_html,
+    get_heading_from_html,
+    get_images_from_html,
+    get_urls_from_html,
+)
 
 
 class TestHtmlContent(unittest.TestCase):
@@ -23,6 +28,46 @@ class TestHtmlContent(unittest.TestCase):
     def test_get_first_paragraph_from_html_returns_empty_string_when_no_p_exists(self):
         html = "<html><body><h1>Title</h1></body></html>"
         self.assertEqual(get_first_paragraph_from_html(html), "")
+
+    def test_get_urls_from_html_returns_absolute_urls(self):
+        base_url = "https://crawler-test.com"
+        html = '<html><body><a href="/about">About</a></body></html>'
+        self.assertEqual(
+            get_urls_from_html(html, base_url),
+            ["https://crawler-test.com/about"],
+        )
+
+    def test_get_urls_from_html_returns_all_anchor_urls(self):
+        base_url = "https://crawler-test.com"
+        html = (
+            '<html><body><a href="/first">First</a>'
+            '<a href="https://example.com">Second</a></body></html>'
+        )
+        self.assertEqual(
+            get_urls_from_html(html, base_url),
+            ["https://crawler-test.com/first", "https://example.com"],
+        )
+
+    def test_get_images_from_html_returns_relative_url_as_absolute(self):
+        base_url = "https://crawler-test.com"
+        html = '<html><body><img src="/logo.png" alt="Logo"></body></html>'
+        self.assertEqual(
+            get_images_from_html(html, base_url),
+            ["https://crawler-test.com/logo.png"],
+        )
+
+    def test_get_images_from_html_returns_absolute_url(self):
+        base_url = "https://crawler-test.com"
+        html = '<html><body><img src="https://example.com/logo.png"></body></html>'
+        self.assertEqual(
+            get_images_from_html(html, base_url),
+            ["https://example.com/logo.png"],
+        )
+
+    def test_get_images_from_html_skips_image_without_src(self):
+        base_url = "https://crawler-test.com"
+        html = '<html><body><img alt="Missing source"></body></html>'
+        self.assertEqual(get_images_from_html(html, base_url), [])
 
 
 if __name__ == "__main__":
